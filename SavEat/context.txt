@@ -1,0 +1,22 @@
+This file is for the context of the project.
+
+Im creating a website to save restaurants where I have eaten or i want to eat.
+
+The website is mobile only.
+
+The website is built with Laravel 11, tailwindcss, and livewire...
+
+There are 2 main features:
+
+1) Restaurants management. I can add, edit, and delete restaurants
+Information about the restaurant: name, location, cuisine, rating, price range, tags
+
+2) Tags management. I can add, edit, and delete tags.
+There are some system dafault tags that cannot be deleted and are the same for all users.
+The others tags are user specific and can be deleted by the user.
+
+I want to be able to search for restaurants by name, location, cuisine, rating, price range, and tags.
+
+
+Notes:
+- I want the website to be a PWA

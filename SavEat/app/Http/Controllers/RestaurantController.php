@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Restaurant;
 
 class RestaurantController extends Controller
 {
@@ -19,7 +20,7 @@ class RestaurantController extends Controller
      */
     public function create()
     {
-        //
+        return view('restaurants.create');
     }
 
     /**
@@ -41,9 +42,9 @@ class RestaurantController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Restaurant $restaurant)
     {
-        //
+        return view('restaurants.edit', ['restaurant' => $restaurant]);
     }
 
     /**
