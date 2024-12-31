@@ -16,6 +16,10 @@ export default defineConfig({
         host: '0.0.0.0',
         hmr: {
             host: '192.168.68.113'
+        },
+        cors: true,
+        headers: {
+            'Access-Control-Allow-Origin': '*'
         }
     },
 });

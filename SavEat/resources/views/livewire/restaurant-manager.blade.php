@@ -251,7 +251,7 @@
         </div>
     @endif
 
-    @if($restaurants->isEmpty())
+    @if(!$restaurants || $restaurants->isEmpty())
         <div class="text-center py-8">
             <p class="text-gray-500">{{ __('No restaurants found') }}</p>
         </div>

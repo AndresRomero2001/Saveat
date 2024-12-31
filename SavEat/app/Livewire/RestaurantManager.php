@@ -34,6 +34,7 @@ class RestaurantManager extends Component
 
     public function mount()
     {
+        $this->restaurants = collect();
         $this->selectedTags = collect();
         $this->applyDefaultFilters();
     }
