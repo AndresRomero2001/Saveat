@@ -305,5 +305,9 @@
     "Set your default filters so you can apply them with one touch": "Establece los filtros por defecto para que puedas aplicarlos con un solo toque",
     "Main Tag": "Etiqueta principal",
     "Main Location": "Ubicación principal",
-    "Additional Tags": "Etiquetas adicionales"
+    "Additional Tags": "Etiquetas adicionales",
+    "Other tags": "Otras etiquetas",
+    "Default filters saved successfully": "Filtros por defecto guardados correctamente",
+    "Filters saved successfully": "Filtros guardados correctamente",
+    "Default filters updated": "Filtros por defecto actualizados"
 }

@@ -1,4 +1,14 @@
-<div class="mt-6 space-y-6">
+<div class="mt-4 space-y-6">
+    <header>
+        <h2 class="text-lg font-medium text-gray-900">
+            {{ __('Default Filters') }}
+        </h2>
+
+        <p class="mt-1 text-sm text-gray-600">
+            {{ __('Set your default filters so you can apply them with one touch') }}
+        </p>
+    </header>
+
     <!-- Main Tag -->
     <div>
         <label class="block text-sm font-medium text-gray-700">{{ __('Main Tag') }}</label>
@@ -185,12 +195,18 @@
     </div>
 
     <!-- Save Button -->
-    <div class="flex items-center gap-4 pt-4">
-        <button
-            wire:click="saveDefaultFilters"
-            class="px-4 py-2 bg-primary-blue text-white rounded-lg font-medium"
+    <div class="flex justify-end pt-4">
+        @if($showSuccessMessage)
+            <div
+                class="mr-2 bg-green-100 text-green-800 border border-green-300 rounded-lg p-2 text-xs transition-opacity duration-300"
+            >
+                {{ __('Default filters updated') }}
+            </div>
+        @endif
+        <x-primary-button
+            wire:click="saveDefaultFilters" type="button"
         >
             {{ __('Save') }}
-        </button>
+        </x-primary-button>
     </div>
 </div>

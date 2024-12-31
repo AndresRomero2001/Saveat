@@ -11,8 +11,9 @@
 
     <form method="POST" action="{{ route('logout') }}">
         @csrf
-        <x-danger-button>
-            {{ __('Cerrar sesión') }}
-        </x-danger-button>
+        <div class="flex justify-end">
+            <x-danger-button>
+                {{ __('Cerrar sesión') }}
+            </x-danger-button>
     </form>
 </section>

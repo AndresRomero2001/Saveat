@@ -22,6 +22,7 @@ class DefaultFilters extends Component
         'price_ranges' => [],
         'tag_ids' => []
     ];
+    public $showSuccessMessage = false;
 
     public function mount()
     {
@@ -103,7 +104,13 @@ class DefaultFilters extends Component
             ]
         );
 
-        $this->dispatch('default-filters-saved');
+        $this->showSuccessMessage = true;
+    }
+
+    #[On('hideMessage')]
+    public function hideMessage()
+    {
+        $this->showSuccessMessage = false;
     }
 
     public function render()

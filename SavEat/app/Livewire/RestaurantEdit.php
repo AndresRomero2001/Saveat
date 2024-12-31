@@ -16,7 +16,7 @@ class RestaurantEdit extends Component
     public $name = '';
     public $main_tag_id = '';
     public $main_location_tag_id = '';
-    public $price_range = '';
+    public $price_range = null;
     public $rating = null;
     public $description = '';
     public $selectedTags = [];
@@ -26,6 +26,13 @@ class RestaurantEdit extends Component
     public $selectedMainTag = null;
     public $selectedLocationTag = null;
     public $showDeleteModal = false;
+    public $showCreateTagModal = false;
+    public $newTagName = '';
+    public $newTagIsLocation = false;
+    public $mainTagSearchFocused = false;
+    public $locationTagSearchFocused = false;
+    public $tagSearchFocused = false;
+    public $createTagSource = '';
 
     public function mount(Restaurant $restaurant)
     {
@@ -56,7 +63,7 @@ class RestaurantEdit extends Component
             'name' => ['required', 'string', 'max:255'],
             'main_tag_id' => ['required', 'exists:tags,id'],
             'main_location_tag_id' => ['required', 'exists:tags,id'],
-            'price_range' => [new Enum(PriceRange::class)],
+            'price_range' => ['nullable'],
             'rating' => ['nullable', 'numeric', 'min:0', 'max:5'],
             'description' => ['nullable', 'string'],
             'selectedTags' => ['array'],
@@ -114,6 +121,11 @@ class RestaurantEdit extends Component
     {
         $validated = $this->validate();
 
+        // Convert empty price_range to null
+        if ($validated['price_range'] === '') {
+            $validated['price_range'] = null;
+        }
+
         $this->restaurant->update($validated);
 
         // Sync tags
@@ -131,6 +143,53 @@ class RestaurantEdit extends Component
 
         return redirect()->route('restaurants.index')
             ->with('message', __('Restaurant deleted successfully'));
+    }
+
+    public function openCreateTagModal($source)
+    {
+    $this->createTagSource = $source;
+
+        switch ($source) {
+            case 'main':
+                $this->newTagName = $this->mainTagSearch;
+                $this->newTagIsLocation = false;
+                break;
+            case 'location':
+                $this->newTagName = $this->locationTagSearch;
+                $this->newTagIsLocation = true;
+                break;
+            default:
+                $this->newTagName = $this->tagSearch;
+                $this->newTagIsLocation = false;
+        }
+
+        $this->showCreateTagModal = true;
+    }
+
+    public function createTag()
+    {
+        $tag = Tag::create([
+            'name' => $this->newTagName,
+            'user_id' => Auth::id(),
+            'is_location' => $this->newTagIsLocation
+        ]);
+
+        // Use createTagSource instead of focus states
+        if ($this->createTagSource === 'location') {
+            $this->setLocationTag($tag->id);
+            $this->locationTagSearch = '';
+        } elseif ($this->createTagSource === 'main') {
+            $this->setMainTag($tag->id);
+            $this->mainTagSearch = '';
+        } else {
+            $this->addTag($tag->id);
+            $this->tagSearch = '';
+        }
+
+        $this->showCreateTagModal = false;
+        $this->newTagName = '';
+        $this->newTagIsLocation = false;
+        $this->createTagSource = '';
     }
 
     public function render()

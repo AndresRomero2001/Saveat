@@ -24,6 +24,13 @@ class RestaurantManager extends Component
         'main_tag_id' => null,
         'main_location_tag_id' => null
     ];
+    public $mainTagSearch = '';
+    public $locationTagSearch = '';
+    public $mainTagSearchFocused = false;
+    public $locationTagSearchFocused = false;
+    public $tagSearchFocused = false;
+    public $selectedMainTag = null;
+    public $selectedLocationTag = null;
 
     public function mount()
     {
@@ -91,13 +98,20 @@ class RestaurantManager extends Component
             $query->whereIn('restaurants.price_range', $this->filters['price_ranges']);
         }
 
+        // Handle main tag filter
+        if ($this->filters['main_tag_id']) {
+            $query->where('main_tag_id', $this->filters['main_tag_id']);
+        }
+
+        // Handle location tag filter
+        if ($this->filters['main_location_tag_id']) {
+            $query->where('main_location_tag_id', $this->filters['main_location_tag_id']);
+        }
+
+        // Handle other tags filter
         if (!empty($this->filters['tag_ids'])) {
-            $query->where(function($query) {
-                $query->whereHas('tags', function ($q) {
-                    $q->whereIn('tags.id', $this->filters['tag_ids']);
-                })
-                ->orWhereIn('main_location_tag_id', $this->filters['tag_ids'])
-                ->orWhereIn('main_tag_id', $this->filters['tag_ids']);
+            $query->whereHas('tags', function ($q) {
+                $q->whereIn('tags.id', $this->filters['tag_ids']);
             });
         }
 
@@ -107,6 +121,16 @@ class RestaurantManager extends Component
     public function render()
     {
         return view('livewire.restaurant-manager', [
+            'searchedMainTags' => Tag::where('name', 'like', '%' . $this->mainTagSearch . '%')
+                ->where('is_location', false)
+                ->orderBy('name')
+                ->limit(5)
+                ->get(),
+            'searchedLocationTags' => Tag::where('name', 'like', '%' . $this->locationTagSearch . '%')
+                ->where('is_location', true)
+                ->orderBy('name')
+                ->limit(5)
+                ->get(),
             'searchedTags' => Tag::where('name', 'like', '%' . $this->tagSearch . '%')
                 ->whereNotIn('id', $this->selectedTags->pluck('id'))
                 ->orderBy('name')
@@ -151,14 +175,17 @@ class RestaurantManager extends Component
         $defaultFilters = UserDefaultFilter::where('user_id', Auth::id())->first();
         if (!$defaultFilters) return false;
 
-        // Create the same combined tags array for comparison
-        $allTags = $defaultFilters->tag_ids ?? [];
-        $allTags[] = $defaultFilters->main_tag_id;
-        $allTags[] = $defaultFilters->main_location_tag_id;
+        // Create arrays for comparison
+        $defaultTags = $defaultFilters->tag_ids ?? [];
+        $currentTags = $this->filters['tag_ids'];
+
+        // Sort arrays to ensure consistent comparison
+        sort($defaultTags);
+        sort($currentTags);
 
         return $this->filters['rating'] == $defaultFilters->rating
             && $this->filters['price_ranges'] == $defaultFilters->price_ranges
-            && $this->filters['tag_ids'] == $allTags
+            && $currentTags == $defaultTags
             && $this->filters['main_tag_id'] == $defaultFilters->main_tag_id
             && $this->filters['main_location_tag_id'] == $defaultFilters->main_location_tag_id;
     }
@@ -170,15 +197,23 @@ class RestaurantManager extends Component
         if ($defaultFilters) {
             $this->filters['rating'] = $defaultFilters->rating ?? 0;
             $this->filters['price_ranges'] = $defaultFilters->price_ranges ?? [];
-            // group both main tags with other tags
-            $allTags = $defaultFilters->tag_ids ?? [];
-            $allTags[] = $defaultFilters->main_tag_id;
-            $allTags[] = $defaultFilters->main_location_tag_id;
-            $this->filters['tag_ids'] = $allTags;
+
+            // Set main tags first
             $this->filters['main_tag_id'] = $defaultFilters->main_tag_id;
             $this->filters['main_location_tag_id'] = $defaultFilters->main_location_tag_id;
 
+            // Set selected main tags for the UI
+            if ($defaultFilters->main_tag_id) {
+                $this->selectedMainTag = Tag::find($defaultFilters->main_tag_id);
+            }
+            if ($defaultFilters->main_location_tag_id) {
+                $this->selectedLocationTag = Tag::find($defaultFilters->main_location_tag_id);
+            }
+
+            // Set other tags (excluding main tags)
+            $this->filters['tag_ids'] = $defaultFilters->tag_ids ?? [];
             $this->selectedTags = Tag::whereIn('id', $this->filters['tag_ids'])->get();
+
             $this->dispatch('rating-reset');
             $this->loadRestaurants();
         }
@@ -192,4 +227,33 @@ class RestaurantManager extends Component
             $this->applyDefaultFilters();
         }
     }
+
+    public function setMainTag($tagId)
+    {
+        $tag = Tag::find($tagId);
+        $this->filters['main_tag_id'] = $tagId;
+        $this->selectedMainTag = $tag;
+        $this->mainTagSearch = '';
+    }
+
+    public function removeMainTag()
+    {
+        $this->filters['main_tag_id'] = null;
+        $this->selectedMainTag = null;
+    }
+
+    public function setLocationTag($tagId)
+    {
+        $tag = Tag::find($tagId);
+        $this->filters['main_location_tag_id'] = $tagId;
+        $this->selectedLocationTag = $tag;
+        $this->locationTagSearch = '';
+    }
+
+    public function removeLocationTag()
+    {
+        $this->filters['main_location_tag_id'] = null;
+        $this->selectedLocationTag = null;
+    }
+
 }
