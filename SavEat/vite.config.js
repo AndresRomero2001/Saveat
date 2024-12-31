@@ -6,14 +6,13 @@ export default defineConfig({
         laravel({
             input: [
                 'resources/css/app.css',
-                'resources/css/5-star-rating.css',
                 'resources/js/app.js'
             ],
             refresh: true,
         }),
     ],
-    server: {
-        host: '127.0.0.1',
-        port: 5173
+    build: {
+        manifest: true,
+        outDir: 'public/build',
     }
 });
